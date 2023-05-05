@@ -6,12 +6,6 @@
 #include <numeric>
 #include <queue>
 
-namespace {
-
-const int STONE_CONSTANT = 20;
-
-}    // namespace
-
 void MazeSolver::initialize(const std::vector<std::string>& map) {
     this->map = map;
     procedure.clear();
@@ -58,8 +52,10 @@ void MazeSolver::solve() {
             }
 
             bool can_continue = true;
+            int move_distance = 0;
             do {    // 氷による滑り
                 curr_pos += direction;
+                move_distance++;
                 if (curr_pos.column < 0 || curr_pos.row < 0) {    // 画面の外に出るならスキップ
                     can_continue = false;
                     break;
@@ -89,11 +85,12 @@ void MazeSolver::solve() {
             max_step_counts = std::max(step_counts[curr_pos.column][curr_pos.row], max_step_counts);
             if (!satisfied) {
                 state_count++;
+                rating += move_distance;
             }
         }
     }
     restore_procedure();
-    calculate_rating();
+    rating *= procedure.size();
 }
 
 void MazeSolver::restore_procedure() {
@@ -138,8 +135,9 @@ void MazeSolver::restore_procedure() {
                 }
             } while (step_counts[curr_pos.column][curr_pos.row] != curr_step_count);
 
-            if (!can_continue)
+            if (!can_continue) {
                 continue;
+            }
 
             move_distance.push_back(curr_move_distance);
             answer_step_counts[curr_pos.column][curr_pos.row] = curr_step_count;
@@ -168,23 +166,24 @@ std::string MazeSolver::get_answer() {
 void MazeSolver::show_result() {
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            if (map[i][j] == '#')
+            if (map[i][j] == '#') {
                 std::cout << "  #";
-            else if (map[i][j] == 'S')
+            } else if (map[i][j] == 'S') {
                 std::cout << "  S";
-            else if (map[i][j] == 'G')
+            } else if (map[i][j] == 'G') {
                 std::cout << "  G";
-            else if (step_counts[i][j] == -1)
+            } else if (step_counts[i][j] == -1) {
                 std::cout << "  .";
-            else
+            } else {
                 printf("%3d", step_counts[i][j]);
+            }
         }
         std::cout << std::endl;
     }
-    std::cout << "Procedure     : " << (procedure.size() > 0 ? procedure : "None") << std::endl;
-    std::cout << "Procedure cnt : " << procedure.size() << std::endl;
-    std::cout << "State cnt     : " << state_count << std::endl;
-    std::cout << "rating        : " << rating << std::endl;
+    std::cout << "Procedure       : " << (procedure.size() > 0 ? procedure : "None") << std::endl;
+    std::cout << "Procedure Count : " << procedure.size() << std::endl;
+    std::cout << "State Count     : " << state_count << std::endl;
+    std::cout << "rating          : " << rating << std::endl;
 }
 
 void MazeSolver::output_result(std::string filepath) {
@@ -192,38 +191,29 @@ void MazeSolver::output_result(std::string filepath) {
     output_file.open(filepath, std::ios::out);
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            if (map[i][j] == '#')
+            if (map[i][j] == '#') {
                 output_file << "  #";
-            else if (map[i][j] == 'S')
+            } else if (map[i][j] == 'S') {
                 output_file << "  S";
-            else if (map[i][j] == 'G')
+            } else if (map[i][j] == 'G') {
                 output_file << "  G";
-            else if (step_counts[i][j] == -1)
+            } else if (step_counts[i][j] == -1) {
                 output_file << "  .";
-            else
+            } else {
                 output_file << std::setw(3) << step_counts[i][j];
+            }
         }
         output_file << std::endl;
     }
-    output_file << "Procedure     : " << (procedure.size() > 0 ? procedure : "None") << std::endl;
-    output_file << "Procedure cnt : " << procedure.size() << std::endl;
-    output_file << "State cnt     : " << state_count << std::endl;
-    output_file << "rating        : " << rating << std::endl;
+    output_file << "Procedure       : " << (procedure.size() > 0 ? procedure : "None") << std::endl;
+    output_file << "Procedure Count : " << procedure.size() << std::endl;
+    output_file << "State Count     : " << state_count << std::endl;
+    output_file << "rating          : " << rating << std::endl;
     output_file.close();
 }
 
 bool MazeSolver::satisfied() {
     return procedure.size() > 0;
-}
-
-void MazeSolver::calculate_rating() {
-    int stone_count = -(height * 2 + width * 2 - 4);
-    for (int i = 0; i < height; i++)
-        for (int j = 0; j < width; j++)
-            stone_count += map[i][j] == '#';
-
-    int move_count = procedure.size();
-    rating = satisfied() ? std::max(2, move_count * state_count - stone_count * STONE_CONSTANT) : 1;
 }
 
 int MazeSolver::get_rating() {

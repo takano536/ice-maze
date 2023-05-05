@@ -43,16 +43,17 @@ void GeneticAlgorithm::change_generation() {
         // 現在の情報を表示
         std::cout << "Generation : " << curr_generation << std::endl;
         std::cout << "Rating     : " << parents[MAX_CHROMOSOME_COUNT - 1].get_rating() << std::endl;
-        // std::cout << "Max Rating : " << best_chromosome.get_rating() << std::endl;
         std::cout << std::endl;
     }
 
     int total_rating = 0;
-    for (int i = 0; i < MAX_CHROMOSOME_COUNT; i++)
+    for (int i = 0; i < MAX_CHROMOSOME_COUNT; i++) {
         total_rating += parents[i].get_rating();
+    }
     std::vector<int> rating_cumulative_sum(MAX_CHROMOSOME_COUNT + 1);
-    for (int i = 0; i < MAX_CHROMOSOME_COUNT; i++)
+    for (int i = 0; i < MAX_CHROMOSOME_COUNT; i++) {
         rating_cumulative_sum[i + 1] = rating_cumulative_sum[i] + parents[i].get_rating();
+    }
 
     // 乱数生成機を生成
     std::random_device rnd;

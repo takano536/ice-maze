@@ -1,7 +1,7 @@
 #include "./modules/GeneticAlgorithm/GeneticAlgorithm.hpp"
 
 int main() {
-    const int MAX_GENERATION_COUNT = 1000;
+    const int MAX_GENERATION_COUNT = 10000;
     const std::string RESULT_DIRPATH = "../res/";
 
     GeneticAlgorithm genetic_algorithm;

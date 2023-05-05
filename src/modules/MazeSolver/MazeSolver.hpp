@@ -17,7 +17,6 @@ class MazeSolver {
 
   private:
     void restore_procedure();
-    void calculate_rating();
 
   private:
     const std::array<Vec2, 4> SEARCH_DIRECTION = {Vec2{1, 0}, Vec2{0, 1}, Vec2{-1, 0}, Vec2{0, -1}};
