@@ -6,6 +6,10 @@
 #include <numeric>
 #include <queue>
 
+namespace {
+const int SHORT_DISTANCE = 4;
+}
+
 void MazeSolver::initialize(const std::vector<std::string>& map) {
     this->map = map;
     procedure.clear();
@@ -25,7 +29,7 @@ void MazeSolver::initialize(const std::vector<std::string>& map) {
     }
     state_count = 0;
     max_step_counts = 0;
-    move_distance.clear();
+    move_distances.clear();
     rating = 0;
 }
 
@@ -83,19 +87,23 @@ void MazeSolver::solve() {
             que.push(curr_pos);
             step_counts[curr_pos.column][curr_pos.row] = step_counts[prev_pos.column][prev_pos.row] + 1;
             max_step_counts = std::max(step_counts[curr_pos.column][curr_pos.row], max_step_counts);
-            if (!satisfied) {
-                state_count++;
-                rating += move_distance;
-            }
+            rating += move_distance > SHORT_DISTANCE ? 1 : 0;
+            state_count++;
         }
     }
     restore_procedure();
-    rating *= procedure.size();
+
+    int long_distance_count = procedure.size();
+    for (int i = 0; i < SHORT_DISTANCE; i++) {
+        long_distance_count -= std::count(move_distances.begin(), move_distances.end(), i);
+    }
+    rating += long_distance_count * 10;
+    rating = satisfied ? rating : 0;
 }
 
 void MazeSolver::restore_procedure() {
     std::queue<Vec2> que;
-    que.push(Vec2{goal.column, goal.row});
+    que.push(goal);
     int curr_step_count = step_counts[goal.column][goal.row];
     std::vector<std::vector<int>> answer_step_counts(height, std::vector<int>(width, -1));
 
@@ -105,17 +113,17 @@ void MazeSolver::restore_procedure() {
         que.pop();
 
         for (const auto& direction : SEARCH_DIRECTION) {
-            Vec2 curr_pos = prev_pos + direction;
-            if (curr_pos.column < 0 || curr_pos.row < 0) {    // 画面の外に出るならスキップ
+            if ((prev_pos + direction).column < 0 || (prev_pos + direction).row < 0) {    // 画面の外に出るならスキップ
                 continue;
             }
-            if (curr_pos.column >= height || curr_pos.row >= width) {    // 画面の外に出るならスキップ
+            if ((prev_pos + direction).column >= height || (prev_pos + direction).row >= width) {    // 画面の外に出るならスキップ
                 continue;
             }
-            if (map[curr_pos.column][curr_pos.row] == '#') {    // 壁に埋まっているならスキップ
+            if (map[(prev_pos + direction).column][(prev_pos + direction).row] == '#') {    // 壁に埋まっているならスキップ
                 continue;
             }
 
+            Vec2 curr_pos = prev_pos;
             int curr_move_distance = 0;
             bool can_continue = true;
             do {
@@ -139,7 +147,7 @@ void MazeSolver::restore_procedure() {
                 continue;
             }
 
-            move_distance.push_back(curr_move_distance);
+            move_distances.push_back(curr_move_distance);
             answer_step_counts[curr_pos.column][curr_pos.row] = curr_step_count;
             que.push(curr_pos);
 
@@ -186,7 +194,7 @@ void MazeSolver::show_result() {
     std::cout << "rating          : " << rating << std::endl;
 }
 
-void MazeSolver::output_result(std::string filepath) {
+void MazeSolver::output_result(const std::string& filepath) {
     std::ofstream output_file;
     output_file.open(filepath, std::ios::out);
     for (int i = 0; i < height; i++) {

@@ -11,7 +11,7 @@ class MazeSolver {
     void solve();
     std::string get_answer();
     void show_result();
-    void output_result(std::string filepath);
+    void output_result(const std::string& filepath);
     bool satisfied();
     int get_rating();
 
@@ -29,6 +29,6 @@ class MazeSolver {
     std::string procedure;
     int state_count;
     int max_step_counts;
-    std::vector<int> move_distance;
+    std::vector<int> move_distances;
     int rating;
 };
