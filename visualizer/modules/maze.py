@@ -10,9 +10,9 @@ class Maze:
             self.__field = [s.strip() for s in f.readlines()]
         for i in range(len(self.__field)):
             if 'S' in self.__field[i]:
-                self.__start = (i, self.__field[i].index('S'))
+                self.__start = (self.__field[i].index('S'), i)
             if 'G' in self.__field[i]:
-                self.__goal = (i, self.__field[i].index('G'))
+                self.__goal = (self.__field[i].index('G'), i)
 
     def field(self):
         return self.__field

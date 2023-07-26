@@ -30,5 +30,5 @@ class MazeSolver {
     int state_count;
     int max_step_counts;
     std::vector<int> move_distances;
-    int rating;
+    unsigned long long int rating;
 };

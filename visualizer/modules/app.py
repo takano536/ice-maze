@@ -7,37 +7,38 @@ import sys
 
 class App:
 
-    MAZE_WIDTH = 12 + 2
-    MAZE_HEIGHT = 12 + 2
-
     TILE_SIZE = 32
 
     PADDING = TILE_SIZE
 
-    WALL_COLOR = (33, 33, 33)
-    BG_COLOR = (66, 165, 245)
+    BG_COLOR = (33, 33, 33)
+    WALL_COLOR = BG_COLOR
+    ICE_COLOR = (66, 165, 245)
     PLAYER_COLOR = (205, 220, 57)
+    GOAL_COLOR = (39, 99, 147)
 
     FPS = 60
 
-    PLAYER_INIT_SPEED = 0.2
+    PLAYER_INIT_SPEED = 0.4
     PLAYER_ACCELERATION = 0
 
     def __init__(self) -> None:
-        pygame.init()
-        pygame.display.set_caption('Visualizer')
-        self.__screen_size = (
-            self.MAZE_WIDTH * self.TILE_SIZE,
-            self.MAZE_HEIGHT * self.TILE_SIZE
-        )
-        self.__screen = pygame.display.set_mode(self.__screen_size)
-        self.__clock = pygame.time.Clock()
         self.__maze = modules.maze.Maze()
         self.__player = modules.player.Player(
             self.__maze.start(),
             self.PLAYER_INIT_SPEED,
             self.PLAYER_ACCELERATION
         )
+        self.__maze_width = len(self.__maze.field()[0])
+        self.__maze_height = len(self.__maze.field())
+        pygame.init()
+        pygame.display.set_caption('Visualizer')
+        screen_size = (
+            self.__maze_width * self.TILE_SIZE + self.PADDING,
+            self.__maze_height * self.TILE_SIZE + self.PADDING
+        )
+        self.__screen = pygame.display.set_mode(screen_size)
+        self.__clock = pygame.time.Clock()
 
     def run(self):
         while (True):
@@ -63,16 +64,16 @@ class App:
     def draw(self):
         self.__screen.fill(self.BG_COLOR)
 
-        # draw walls
+        # draw field
         for i in range(len(self.__maze.field())):
             for j in range(len(self.__maze.field()[i])):
-                if self.__maze.field()[i][j] != '#':
-                    continue
-                x = j * self.TILE_SIZE
-                y = i * self.TILE_SIZE
+                x = j * self.TILE_SIZE + self.PADDING / 2
+                y = i * self.TILE_SIZE + self.PADDING / 2
+                color = self.GOAL_COLOR if self.__maze.field()[i][j] == 'G' else self.ICE_COLOR
+                color = self.WALL_COLOR if self.__maze.field()[i][j] == '#' else color
                 pygame.draw.rect(
                     self.__screen,
-                    self.WALL_COLOR,
+                    color,
                     (x, y, self.TILE_SIZE, self.TILE_SIZE)
                 )
 
@@ -82,8 +83,8 @@ class App:
             self.__screen,
             self.PLAYER_COLOR,
             (
-                player_coord[0] * self.TILE_SIZE,
-                player_coord[1] * self.TILE_SIZE,
+                player_coord[0] * self.TILE_SIZE + self.PADDING / 2,
+                player_coord[1] * self.TILE_SIZE + self.PADDING / 2,
                 self.TILE_SIZE,
                 self.TILE_SIZE
             )

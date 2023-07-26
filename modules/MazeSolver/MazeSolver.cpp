@@ -7,8 +7,10 @@
 #include <queue>
 
 namespace {
-const int SHORT_DISTANCE = 4;
-}
+
+const int STONE_CONSTANT = 20;
+
+}    // namespace
 
 void MazeSolver::initialize(const std::vector<std::string>& map) {
     this->map = map;
@@ -87,18 +89,21 @@ void MazeSolver::solve() {
             que.push(curr_pos);
             step_counts[curr_pos.column][curr_pos.row] = step_counts[prev_pos.column][prev_pos.row] + 1;
             max_step_counts = std::max(step_counts[curr_pos.column][curr_pos.row], max_step_counts);
-            rating += move_distance > SHORT_DISTANCE ? 1 : 0;
             state_count++;
         }
     }
-    restore_procedure();
-
-    int long_distance_count = procedure.size();
-    for (int i = 0; i < SHORT_DISTANCE; i++) {
-        long_distance_count -= std::count(move_distances.begin(), move_distances.end(), i);
+    if (!satisfied) {
+        return;
     }
-    rating += long_distance_count * 10;
-    rating = satisfied ? rating : 0;
+
+    restore_procedure();
+    int stone_count = -(height * 2 + width * 2 - 4);
+    for (int i = 0; i < height; i++)
+        for (int j = 0; j < width; j++)
+            stone_count += map[i][j] == '#';
+
+    int move_count = procedure.size();
+    rating = std::max(2, move_count * state_count - stone_count * STONE_CONSTANT);
 }
 
 void MazeSolver::restore_procedure() {
