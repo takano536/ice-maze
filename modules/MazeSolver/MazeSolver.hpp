@@ -11,7 +11,7 @@ class MazeSolver {
     void solve();
     std::string get_answer();
     void show_result();
-    void output_result(const std::string& filepath);
+    void output_result(const std::string& filepath, bool is_format);
     bool satisfied();
     int get_rating();
 

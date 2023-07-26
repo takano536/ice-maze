@@ -14,7 +14,7 @@ int main() {
     const int MAX_GENERATION_COUNT = 1e4;
     const std::string RESULT_DIRPATH = "./res/";
 
-    const Vec2 SIZE = {13, 13};
+    const Vec2 SIZE = {15, 20};
 
     const int BIT_LENGTH = SIZE.row * SIZE.column;
 
@@ -48,8 +48,9 @@ int main() {
             continue;
         }
         maze_generator.output_map(RESULT_DIRPATH + "maze.txt", false);
-        maze_generator.output_map(RESULT_DIRPATH + "map.txt", true);
-        maze_solver.output_result(RESULT_DIRPATH + "result.txt");
+        maze_solver.output_result(RESULT_DIRPATH + "answer.txt", false);
+        maze_generator.output_map(RESULT_DIRPATH + "formatted_maze.txt", true);
+        maze_solver.output_result(RESULT_DIRPATH + "formatted_answer.txt", true);
         best_rating = maze_solver.get_rating();
         std::cout << "Generation : " << generation_count << std::endl;
         std::cout << "Rating     : " << best_rating << std::endl;
