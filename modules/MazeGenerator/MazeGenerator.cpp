@@ -1,5 +1,4 @@
 #include "MazeGenerator.hpp"
-
 #include <array>
 #include <fstream>
 #include <iomanip>
@@ -41,16 +40,18 @@ void MazeGenerator::show_map() {
     }
 }
 
-void MazeGenerator::output_map(const std::string& filepath) {
+void MazeGenerator::output_map(const std::string& filepath, bool is_format) {
     std::ofstream output_file;
     output_file.open(filepath, std::ios::out);
     for (int i = 0; i < static_cast<int>(map.size()); i++) {
         for (int j = 0; j < static_cast<int>(map[i].size()); j++) {
-            output_file << std::setw(3) << map[i][j];
+            output_file << std::setw(is_format ? 3 : 0) << map[i][j];
         }
         output_file << std::endl;
     }
-    output_file << "ID : " << map_id << std::endl;
+    if (is_format) {
+        output_file << "ID : " << map_id << std::endl;
+    }
     output_file.close();
 }
 

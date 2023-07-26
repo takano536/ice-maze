@@ -1,5 +1,4 @@
 #include "MazeSolver.hpp"
-
 #include <algorithm>
 #include <fstream>
 #include <iomanip>
@@ -8,9 +7,7 @@
 #include <queue>
 
 namespace {
-
 const int SHORT_DISTANCE = 4;
-
 }
 
 void MazeSolver::initialize(const std::vector<std::string>& map) {

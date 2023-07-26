@@ -1,6 +1,5 @@
 #pragma once
 #include "../Vec2/Vec2.hpp"
-
 #include <string>
 #include <vector>
 
@@ -9,7 +8,7 @@ class MazeGenerator {
     void initialize(const std::string& bit_string, Vec2 size, Vec2 start, Vec2 goal);
     std::vector<std::string> get_map();
     void show_map();
-    void output_map(const std::string& filepath);
+    void output_map(const std::string& filepath, bool is_format);
 
   private:
     std::string bin2hex(const std::string& bin);

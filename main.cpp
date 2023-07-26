@@ -8,7 +8,7 @@
 
 int main() {
     // パラメータ
-    const int MAX_GENERATION_COUNT = 1e5;
+    const int MAX_GENERATION_COUNT = 1e4;
     const std::string RESULT_DIRPATH = "./res/";
 
     const Vec2 SIZE = {12, 12};
@@ -44,7 +44,8 @@ int main() {
         if (maze_solver.get_rating() < best_rating) {
             continue;
         }
-        maze_generator.output_map(RESULT_DIRPATH + "map.txt");
+        maze_generator.output_map(RESULT_DIRPATH + "maze.txt", false);
+        maze_generator.output_map(RESULT_DIRPATH + "map.txt", true);
         maze_solver.output_result(RESULT_DIRPATH + "result.txt");
         best_rating = maze_solver.get_rating();
         std::cout << "Generation : " << generation_count << std::endl;
