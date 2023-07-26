@@ -16,6 +16,7 @@ class App:
     ICE_COLOR = (66, 165, 245)
     PLAYER_COLOR = (205, 220, 57)
     GOAL_COLOR = (39, 99, 147)
+    TEXT_COLOR = (255, 255, 255)
 
     FPS = 60
 
@@ -38,7 +39,9 @@ class App:
             self.__maze_height * self.TILE_SIZE + self.PADDING
         )
         self.__screen = pygame.display.set_mode(screen_size)
+        self.__font = pygame.font.SysFont('Consolas', 16)
         self.__clock = pygame.time.Clock()
+        self.__answer_enabled = False
 
     def run(self):
         while (True):
@@ -53,6 +56,17 @@ class App:
         for event in pygame.event.get():
 
             if event.type == pygame.KEYDOWN:
+
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.key == pygame.K_r:
+                    self.__player.reset()
+
+                if event.key == pygame.K_SPACE:
+                    self.__answer_enabled = True
+
                 self.__player.move(event.key, self.__maze.field())
 
             if event.type == pygame.QUIT:
@@ -75,6 +89,13 @@ class App:
                     self.__screen,
                     color,
                     (x, y, self.TILE_SIZE, self.TILE_SIZE)
+                )
+
+                if not self.__answer_enabled or self.__maze.answer()[i][j] == -1:
+                    continue
+                self.__screen.blit(
+                    self.__font.render(str(self.__maze.answer()[i][j]), True, self.TEXT_COLOR),
+                    (x - self.PADDING * 0.75, y + self.PADDING * 0.25)
                 )
 
         # draw player

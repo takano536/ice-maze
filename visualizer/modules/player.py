@@ -3,6 +3,7 @@ import pygame
 
 class Player:
     def __init__(self, coord: tuple, init_speed: float, acceleration: float) -> None:
+        self.__init_coord = list(coord)
         self.__curr_coord = list(coord)
         self.__next_coord = list(coord)
         self.__is_moving = False
@@ -54,3 +55,9 @@ class Player:
 
     def coord(self) -> tuple:
         return tuple(self.__curr_coord)
+
+    def reset(self) -> None:
+        self.__curr_coord = self.__init_coord.copy()
+        self.__next_coord = self.__init_coord.copy()
+        self.__is_moving = False
+        self.__direction = [0, 0]
