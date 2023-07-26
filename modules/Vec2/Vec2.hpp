@@ -6,10 +6,6 @@ struct Vec2 {
 
     bool operator==(const Vec2& rhs) const;
     bool operator!=(const Vec2& rhs) const;
-    bool operator<(const Vec2& rhs) const;
-    bool operator>(const Vec2& rhs) const;
-    bool operator<=(const Vec2& rhs) const;
-    bool operator>=(const Vec2& rhs) const;
     const Vec2 operator+(const Vec2& rhs) const;
     const Vec2 operator-(const Vec2& rhs) const;
     Vec2& operator+=(const Vec2& rhs);

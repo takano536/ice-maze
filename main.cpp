@@ -1,5 +1,6 @@
 #include "./modules/MazeGenerator/MazeGenerator.hpp"
 #include "./modules/MazeSolver/MazeSolver.hpp"
+
 #include <algorithm>
 #include <array>
 #include <iostream>
@@ -8,7 +9,7 @@
 int main() {
     // パラメータ
     const int MAX_GENERATION_COUNT = 1e5;
-    const std::string RESULT_DIRPATH = "../res/";
+    const std::string RESULT_DIRPATH = "./res/";
 
     const Vec2 SIZE = {12, 12};
     const Vec2 START = {12, 12};
