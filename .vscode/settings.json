@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.m": "matlab",
         "atomic": "cpp",
         "string": "cpp",
         "array": "cpp",
@@ -54,7 +55,15 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp",
         "chrono": "cpp",
-        "ratio": "cpp"
+        "ratio": "cpp",
+        "any": "cpp",
+        "codecvt": "cpp",
+        "forward_list": "cpp",
+        "optional": "cpp",
+        "ranges": "cpp",
+        "span": "cpp",
+        "valarray": "cpp",
+        "set": "cpp"
     },
     "[python]": {
         "editor.defaultFormatter": "ms-python.autopep8"

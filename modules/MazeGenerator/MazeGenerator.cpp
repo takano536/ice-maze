@@ -1,4 +1,5 @@
 #include "MazeGenerator.hpp"
+
 #include <array>
 #include <fstream>
 #include <iomanip>
@@ -7,51 +8,70 @@
 #include <regex>
 
 void MazeGenerator::initialize(const std::string& bit_string, Vec2 size, Vec2 start, Vec2 goal) {
+    std::random_device seed_gen;
+    std::mt19937 rand_engine(seed_gen());
+    auto rand = [&rand_engine](int max) -> int { return rand_engine() % max; };
+
     map.clear();
     this->size = size;
+    this->size_without_wall = size - Vec2{2, 2};
     this->start = start;
     this->goal = goal;
 
-    map.push_back(std::string(this->size.row + 2, '#'));
-    for (int i = 1; i <= size.column; i++) {
+    map.push_back(std::string(this->size.second, '#'));
+    for (int i = 1; i <= size_without_wall.first; i++) {
         map.push_back("#");
-        int start_index = (i - 1) * size.row;
-        map[i] += bit_string.substr(start_index, size.row);
+        int start_idx = (i - 1) * size_without_wall.second;
+        map[i] += bit_string.substr(start_idx, size_without_wall.second);
         map[i] += '#';
         map[i] = std::regex_replace(map[i], std::regex("0"), ".");
         map[i] = std::regex_replace(map[i], std::regex("1"), "#");
     }
-    map.push_back(std::string(this->size.row + 2, '#'));
-    map[start.column][start.row] = 'S';
-    map[goal.column][goal.row] = 'G';
+    map.push_back(std::string(this->size.second, '#'));
+
+    std::vector<Vec2> in_directions;
+    for (std::size_t i = 0; i < DIRECTION.size(); i++) {
+        auto dir = DIRECTION[i];
+        if (map[goal.first + dir.first][goal.second + dir.second] == '.') {
+            in_directions.push_back(dir);
+        }
+    }
+    std::shuffle(in_directions.begin(), in_directions.end(), rand_engine);
+    for (std::size_t i = 1; i < in_directions.size(); i++) {
+        map[goal.first + in_directions[i].first][goal.second + in_directions[i].second] = '#';
+    }
+
+    map[start.first][start.second] = 'S';
+    map[goal.first][goal.second] = 'G';
     map_id = bin2hex(bit_string);
 }
 
-std::vector<std::string> MazeGenerator::get_map() {
+std::vector<std::string> MazeGenerator::get() {
     return map;
 }
 
-void MazeGenerator::show_map() {
-    for (int i = 0; i < static_cast<int>(map.size()); i++) {
-        for (int j = 0; j < static_cast<int>(map[i].size()); j++) {
-            std::cout << std::setw(3) << map[i][j];
+void MazeGenerator::print() {
+    std::cout << size.first << ' ' << size.second << std::endl;
+    for (const auto& s : map) {
+        for (const auto& c : s) {
+            std::cout << std::setw(3) << c;
         }
         std::cout << std::endl;
     }
 }
 
-void MazeGenerator::output_map(const std::string& filepath, bool is_format) {
+void MazeGenerator::output(const std::string& filepath) {
     std::ofstream output_file;
     output_file.open(filepath, std::ios::out);
-    for (int i = 0; i < static_cast<int>(map.size()); i++) {
-        for (int j = 0; j < static_cast<int>(map[i].size()); j++) {
-            output_file << std::setw(is_format ? 3 : 0) << map[i][j];
+
+    output_file << size.first << ' ' << size.second << std::endl;
+    for (const auto& s : map) {
+        for (const auto& c : s) {
+            output_file << std::setw(3) << c;
         }
         output_file << std::endl;
     }
-    if (is_format) {
-        output_file << "ID : " << map_id << std::endl;
-    }
+    output_file << "ID : " << map_id << std::endl;
     output_file.close();
 }
 

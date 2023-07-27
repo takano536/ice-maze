@@ -3,12 +3,15 @@ from pathlib import Path
 
 class Maze:
 
-    MAZE_FILEPATH = Path(__file__).parent.parent.parent / 'res' / 'maze.txt'
+    MAZE_FILEPATH = Path(__file__).parent.parent.parent / 'res' / 'map.txt'
     ANSWER_FILEPATH = Path(__file__).parent.parent.parent / 'res' / 'answer.txt'
 
     def __init__(self) -> None:
         with open(self.MAZE_FILEPATH, 'r') as f:
-            self.__field = [s.strip() for s in f.readlines()]
+            input = [s.strip() for s in f.readlines()]
+        height, _ = map(int, input[0].split())
+        self.__field = [s.replace(' ', '') for s in input[1:height + 1]]
+
         for i in range(len(self.__field)):
             if 'S' in self.__field[i]:
                 self.__start = (self.__field[i].index('S'), i)

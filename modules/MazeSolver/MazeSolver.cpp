@@ -1,239 +1,199 @@
 #include "MazeSolver.hpp"
+
 #include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <numeric>
 #include <queue>
 
-namespace {
-
-const int SHORT_DISTANCE = 4;
-const int RATING_WEIGHT = 10;
-
-}    // namespace
-
-void MazeSolver::initialize(const std::vector<std::string>& map) {
+void MazeSolver::initialize(const std::vector<std::string>& map, Vec2 size, Vec2 start, Vec2 goal) {
     this->map = map;
+    this->size = size;
+    this->start = start;
+    this->goal = goal;
+    steps.clear();
+    steps.resize(size.first, std::vector<int>(size.second, INF));
+
+    visited.clear();
+    visited.resize(size.first, std::vector<bool>(size.second, false));
+
+    passed.clear();
+    passed.resize(size.first, std::vector<bool>(size.second, false));
+
+    answer.clear();
+    answer.resize(size.first, std::vector<int>(size.second, INF));
+
     procedure.clear();
-    height = static_cast<int>(map.size());
-    width = static_cast<int>(map[0].size());
-    step_counts.clear();
-    step_counts.resize(height, std::vector<int>(width, -1));
-    for (int i = 0; i < height; i++) {
-        for (int j = 0; j < width; j++) {
-            if (this->map[i][j] == 'S') {
-                start = Vec2{i, j};
-            }
-            if (this->map[i][j] == 'G') {
-                goal = Vec2{i, j};
-            }
-        }
-    }
-    state_count = 0;
-    max_step_counts = 0;
-    move_distances.clear();
-    rating = 0;
+
+    state_cnt = 0;
+
+    min_dists_from_before_state.clear();
+    min_dists_from_before_state.resize(size.first, std::vector<int>(size.second, INF));
+
+    dists_to_goal.clear();
+
+    rating = INF;
 }
 
 void MazeSolver::solve() {
     std::queue<Vec2> que;
-    step_counts[start.column][start.row] = 0;
     que.push(start);
-    bool satisfied = false;
+    steps[start.first][start.second] = 0;
+    visited[start.first][start.second] = true;
 
     while (!que.empty()) {
-        Vec2 prev_pos = que.front();
+        Vec2 curr_coord = que.front();
         que.pop();
 
-        for (const auto& direction : SEARCH_DIRECTION) {
-            Vec2 curr_pos = prev_pos + direction;
-            if (curr_pos.column < 0 || curr_pos.row < 0) {    // 画面の外に出るならスキップ
-                continue;
-            }
-            if (curr_pos.column >= height || curr_pos.row >= width) {    // 画面の外に出るならスキップ
-                continue;
-            }
-            if (map[curr_pos.column][curr_pos.row] == '#') {    // 壁に埋まっているならスキップ
-                continue;
+        for (const auto& dir : DIRECTION) {
+            Vec2 next_coord = curr_coord;
+            int dist = 0;
+            while (map[next_coord.first + dir.first][next_coord.second + dir.second] != '#') {
+                passed[next_coord.first][next_coord.second] = true;
+                next_coord += dir;
+                dist++;
             }
 
-            bool can_continue = true;
-            int move_distance = 0;
-            do {    // 氷による滑り
-                curr_pos += direction;
-                move_distance++;
-                if (curr_pos.column < 0 || curr_pos.row < 0) {    // 画面の外に出るならスキップ
-                    can_continue = false;
-                    break;
-                }
-                if (curr_pos.column >= height || curr_pos.row >= width) {    // 画面の外に出るならスキップ
-                    can_continue = false;
-                    break;
-                }
-            } while (map[curr_pos.column][curr_pos.row] != '#');
-            curr_pos -= direction;
+            int prev_min_dist = min_dists_from_before_state[next_coord.first][next_coord.second];
+            min_dists_from_before_state[next_coord.first][next_coord.second] = std::min(dist, prev_min_dist);
 
-            if (!can_continue) {
+            if (visited[next_coord.first][next_coord.second]) {
                 continue;
             }
 
-            if (map[curr_pos.column][curr_pos.row] == 'G') {
-                satisfied = true;
-            }
-
-            if (step_counts[curr_pos.column][curr_pos.row] != -1) {    // 到達座標ならスキップ
-                continue;
-            }
-
-            // 未到達座標なら記録
-            que.push(curr_pos);
-            step_counts[curr_pos.column][curr_pos.row] = step_counts[prev_pos.column][prev_pos.row] + 1;
-            max_step_counts = std::max(step_counts[curr_pos.column][curr_pos.row], max_step_counts);
-            rating += move_distance > SHORT_DISTANCE ? 1 : 0;
-            state_count++;
+            state_cnt++;
+            visited[next_coord.first][next_coord.second] = true;
+            steps[next_coord.first][next_coord.second] = steps[curr_coord.first][curr_coord.second] + 1;
+            que.push(next_coord);
         }
     }
-    if (!satisfied) {
+
+    if (!satisfied()) {
         return;
     }
 
     restore_procedure();
+}
 
-    int long_distance_count = procedure.size();
-    for (int i = 0; i < SHORT_DISTANCE; i++) {
-        long_distance_count -= std::count(move_distances.begin(), move_distances.end(), i);
+int MazeSolver::calcuate_rating() {
+    if (rating != INF) {
+        return rating;
     }
-    rating += long_distance_count * 10;
-    rating = satisfied ? rating : 0;
-    rating *= RATING_WEIGHT;
+
+    rating = 0;
+    if (!satisfied()) {
+        return rating;
+    }
+
+    int stone_cnt = -(size.first * 2 + size.second * 2 - 4);
+    for (const auto& s : map) {
+        stone_cnt += std::count(s.begin(), s.end(), '#');
+    }
+    rating -= stone_cnt * 40;
+
+    rating += procedure.size() * 100;
+    rating += std::ceil(std::sqrt(state_cnt) * 100);
+
+    return std::max(rating, 1ULL);
 }
 
 void MazeSolver::restore_procedure() {
-    std::queue<Vec2> que;
-    que.push(goal);
-    int curr_step_count = step_counts[goal.column][goal.row];
-    std::vector<std::vector<int>> answer_step_counts(height, std::vector<int>(width, -1));
+    int curr_step = steps[goal.first][goal.second];
+    auto curr_coord = goal;
+    auto next_coord = curr_coord;
 
-    while (!que.empty() && map[que.front().column][que.front().row] != 'S') {
-        curr_step_count--;
-        Vec2 prev_pos = que.front();
-        que.pop();
+    while (map[curr_coord.first][curr_coord.second] != 'S') {
+        answer[curr_coord.first][curr_coord.second] = curr_step;
+        const int next_step = steps[curr_coord.first][curr_coord.second] - 1;
 
-        for (const auto& direction : SEARCH_DIRECTION) {
-            if ((prev_pos + direction).column < 0 || (prev_pos + direction).row < 0) {    // 画面の外に出るならスキップ
-                continue;
-            }
-            if ((prev_pos + direction).column >= height || (prev_pos + direction).row >= width) {    // 画面の外に出るならスキップ
-                continue;
-            }
-            if (map[(prev_pos + direction).column][(prev_pos + direction).row] == '#') {    // 壁に埋まっているならスキップ
-                continue;
+        for (const auto& dir : DIRECTION) {
+            Vec2 next_coord = curr_coord;
+            int dist = 0;
+            while (steps[next_coord.first][next_coord.second] != next_step && map[next_coord.first - dir.first][next_coord.second - dir.second] != '#') {
+                next_coord -= dir;
+                dist++;
             }
 
-            Vec2 curr_pos = prev_pos;
-            int curr_move_distance = 0;
-            bool can_continue = true;
-            do {
-                curr_pos += direction;
-                curr_move_distance++;
-                if (curr_pos.column < 0 || curr_pos.row < 0) {    // 画面の外に出るならスキップ
-                    can_continue = false;
-                    break;
-                }
-                if (curr_pos.column >= height || curr_pos.row >= width) {    // 画面の外に出るならスキップ
-                    can_continue = false;
-                    break;
-                }
-                if (map[curr_pos.column][curr_pos.row] == '#') {    // 壁に埋まっているならスキップ
-                    can_continue = false;
-                    break;
-                }
-            } while (step_counts[curr_pos.column][curr_pos.row] != curr_step_count);
-
-            if (!can_continue) {
+            if (steps[next_coord.first][next_coord.second] != next_step) {
                 continue;
             }
 
-            move_distances.push_back(curr_move_distance);
-            answer_step_counts[curr_pos.column][curr_pos.row] = curr_step_count;
-            que.push(curr_pos);
-
-            if (direction == Vec2{1, 0}) {
-                procedure += 'U';
-            } else if (direction == Vec2{0, 1}) {
-                procedure += 'L';
-            } else if (direction == Vec2{-1, 0}) {
-                procedure += 'D';
-            } else {
-                procedure += 'R';
+            curr_coord = next_coord;
+            curr_step = next_step;
+            if (dir == Vec2{1, 0}) {
+                procedure += "D";
+            } else if (dir == Vec2{0, 1}) {
+                procedure += "R";
+            } else if (dir == Vec2{-1, 0}) {
+                procedure += "U";
+            } else if (dir == Vec2{0, -1}) {
+                procedure += "L";
             }
+            dists_to_goal.push_back(dist);
             break;
         }
     }
     std::reverse(procedure.begin(), procedure.end());
-    step_counts = answer_step_counts;
+    std::reverse(dists_to_goal.begin(), dists_to_goal.end());
 }
 
-std::string MazeSolver::get_answer() {
-    return procedure;
-}
-
-void MazeSolver::show_result() {
-    for (int i = 0; i < height; i++) {
-        for (int j = 0; j < width; j++) {
-            if (map[i][j] == '#') {
-                std::cout << "  #";
-            } else if (map[i][j] == 'S') {
-                std::cout << "  S";
-            } else if (map[i][j] == 'G') {
-                std::cout << "  G";
-            } else if (step_counts[i][j] == -1) {
-                std::cout << "  .";
-            } else {
-                printf("%3d", step_counts[i][j]);
+void MazeSolver::print() {
+    for (int i = 0; i < size.first; i++) {
+        for (int j = 0; j < size.second; j++) {
+            switch (map[i][j]) {
+                case '#':
+                    std::cout << std::setw(3) << "#";
+                    break;
+                case 'S':
+                    std::cout << std::setw(3) << "S";
+                    break;
+                case 'G':
+                    std::cout << std::setw(3) << (steps[i][j] == INF ? "." : std::to_string(steps[i][j]));
+                    break;
+                case '.':
+                    std::cout << std::setw(3) << (steps[i][j] == INF ? "." : std::to_string(steps[i][j]));
+                    break;
             }
         }
         std::cout << std::endl;
     }
     std::cout << "Procedure       : " << (procedure.size() > 0 ? procedure : "None") << std::endl;
-    std::cout << "Procedure Count : " << procedure.size() << std::endl;
-    std::cout << "State Count     : " << state_count << std::endl;
+    std::cout << "Procedure count : " << procedure.size() << std::endl;
+    std::cout << "State count     : " << state_cnt << std::endl;
     std::cout << "rating          : " << rating << std::endl;
 }
 
-void MazeSolver::output_result(const std::string& filepath, bool is_format) {
+void MazeSolver::output(const std::string& filepath) {
     std::ofstream output_file;
     output_file.open(filepath, std::ios::out);
-    for (int i = 0; i < height; i++) {
-        for (int j = 0; j < width; j++) {
-            if (map[i][j] == '#') {
-                output_file << "  #";
-            } else if (map[i][j] == 'S') {
-                output_file << "  S";
-            } else if (map[i][j] == 'G') {
-                output_file << "  G";
-            } else if (step_counts[i][j] == -1) {
-                output_file << "  .";
-            } else {
-                output_file << std::setw(3) << step_counts[i][j];
+    for (int i = 0; i < size.first; i++) {
+        for (int j = 0; j < size.second; j++) {
+            switch (map[i][j]) {
+                case '#':
+                    output_file << std::setw(3) << "#";
+                    break;
+                case 'S':
+                    output_file << std::setw(3) << "S";
+                    break;
+                case 'G':
+                    output_file << std::setw(3) << "G";
+                    break;
+                case '.':
+                    output_file << std::setw(3) << (answer[i][j] == -1 ? "." : std::to_string(answer[i][j]));
+                    break;
             }
         }
         output_file << std::endl;
     }
-    if (is_format) {
-        output_file << "Procedure       : " << (procedure.size() > 0 ? procedure : "None") << std::endl;
-        output_file << "Procedure Count : " << procedure.size() << std::endl;
-        output_file << "State Count     : " << state_count << std::endl;
-        output_file << "rating          : " << rating << std::endl;
-    }
+    output_file << "Procedure       : " << (procedure.size() > 0 ? procedure : "None") << std::endl;
+    output_file << "Procedure count : " << procedure.size() << std::endl;
+    output_file << "State count     : " << state_cnt << std::endl;
+    output_file << "rating          : " << rating << std::endl;
     output_file.close();
 }
 
 bool MazeSolver::satisfied() {
-    return procedure.size() > 0;
-}
-
-int MazeSolver::get_rating() {
-    return rating;
+    return steps[goal.first][goal.second] != INF;
 }

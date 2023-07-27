@@ -1,11 +1,15 @@
 #pragma once
 
 struct Vec2 {
-    int column;
-    int row;
+    int first;
+    int second;
 
     bool operator==(const Vec2& rhs) const;
     bool operator!=(const Vec2& rhs) const;
+    bool operator<(const Vec2 &rhs) const;
+    bool operator>(const Vec2 &rhs) const;
+    bool operator<=(const Vec2 &rhs) const;
+    bool operator>=(const Vec2 &rhs) const;
     const Vec2 operator+(const Vec2& rhs) const;
     const Vec2 operator-(const Vec2& rhs) const;
     Vec2& operator+=(const Vec2& rhs);
