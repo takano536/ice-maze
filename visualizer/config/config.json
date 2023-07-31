@@ -3,21 +3,22 @@
     "font": "consolas",
     "font_size": 14,
     "color": {
-        "background": [33, 65, 78],
+        "bg": [33, 65, 78],
         "player": [101, 154, 134],
-        "floor": [182, 223, 163],
-        "stone": [33, 65, 78],
-        "wall": [33, 65, 78],
-        "text": [33, 65, 78]
+        "text": [33, 65, 78],
+        ".": [182, 223, 163],
+        "#": [33, 65, 78],
+        "G": [244, 252, 237],
+        "S": [182, 223, 163]
     },
     "tile_size": {
         "width": 32,
         "height": 32
     },
-    "padding_size": {
+    "padding": {
         "width": 32,
         "height": 32
     },
-    "map_filepath": "../../res/map.txt",
-    "answer_filepath": "../../res/answer.txt"
+    "map_filepath": "./res/map.txt",
+    "answer_filepath": "./res/answer.txt"
 }
