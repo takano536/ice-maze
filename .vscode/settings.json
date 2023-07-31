@@ -1,6 +1,5 @@
 {
     "files.associations": {
-        "*.m": "matlab",
         "atomic": "cpp",
         "string": "cpp",
         "array": "cpp",
@@ -69,4 +68,5 @@
         "editor.defaultFormatter": "ms-python.autopep8"
     },
     "python.formatting.provider": "none",
+    "C_Cpp.default.compilerPath": "/usr/bin/gcc",
 }
