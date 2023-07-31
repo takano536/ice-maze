@@ -3,6 +3,22 @@
         {
             "name": "Win32",
             "includePath": [
+                "${workspaceFolder}\\ac-library\\**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "8.1",
+            "compilerPath": "${env:LOCALAPPDATA}\\mingw64\\bin\\gcc.exe",
+            "cStandard": "gnu11",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "windows-gcc-x64"
+        },
+        {
+            "name": "Linux",
+            "includePath": [
                 "${workspaceFolder}/**"
             ],
             "defines": [
@@ -10,10 +26,10 @@
                 "UNICODE",
                 "_UNICODE"
             ],
-            "compilerPath": "C:\\Users\\takanori\\AppData\\Local\\mingw64\\bin\\gcc.exe",
-            "cStandard": "c17",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu11",
             "cppStandard": "gnu++17",
-            "intelliSenseMode": "windows-gcc-x64"
+            "intelliSenseMode": "linux-gcc-x64"
         }
     ],
     "version": 4
