@@ -90,6 +90,7 @@ class Player(pygame.sprite.Sprite):
 
         self.__curr_coord = self.__start_coord.copy()
         self.__next_coord = self.__start_coord.copy()
+        self.__direction = [0, 1]
         self.__is_moving = False
 
         # draw player
