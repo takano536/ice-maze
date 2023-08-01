@@ -24,7 +24,9 @@ class Field:
         self.__player = modules.player.Player(self.__start_coord, size, tile_size, default_speed, colors['player'], surface)
 
     def update(self, surface: pygame.Surface, dirty_rects: list, key: int = None) -> None:
-        if key is not None:
+        if key == pygame.K_r:
+            self.__player.reset(surface, dirty_rects, self.__colors['.'])
+        elif key is not None:
             self.__player.move(key, self.__field)
         else:
             self.__player.update(surface, dirty_rects, self.__colors['.'])

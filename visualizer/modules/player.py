@@ -37,7 +37,7 @@ class Player(pygame.sprite.Sprite):
             return
 
         self.__is_moving = True
-        while field[self.__next_coord[1] + self.__direction[1]][self.__next_coord[0] + self.__direction[0]] != '#':
+        while field[self.__next_coord[1] + self.__direction[1]][self.__next_coord[0] + self.__direction[0]] not in ['#', 'G']:
             self.__next_coord[0] += self.__direction[0]
             self.__next_coord[1] += self.__direction[1]
 
@@ -67,11 +67,21 @@ class Player(pygame.sprite.Sprite):
         pygame.draw.rect(surface, self.__color, next_rect)
         dirty_rects.append(next_rect)
 
-    def reset(self) -> None:
+    def reset(self, surface: pygame.Surface, dirty_rects: list, background_color: tuple) -> None:
+        # draw background
+        curr_rect = pygame.Rect(self.__draw_coord(), self.__size)
+        pygame.draw.rect(surface, background_color, curr_rect)
+        dirty_rects.append(curr_rect)
+
         self.__curr_coord = self.__start_coord.copy()
         self.__next_coord = self.__start_coord.copy()
         self.__is_moving = False
         self.__direction = [0, 0]
+
+        # draw player
+        next_rect = pygame.Rect(self.__draw_coord(), self.__size)
+        pygame.draw.rect(surface, self.__color, next_rect)
+        dirty_rects.append(next_rect)
 
     def __draw_coord(self) -> tuple:
         x = self.__curr_coord[0] * self.__tile_size[0] - self.__padding[0]
