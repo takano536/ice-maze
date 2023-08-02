@@ -32,7 +32,7 @@ class App:
 
         # init surface & dirty rects
         screen_width = len(field[0]) * tile_size[0]
-        screen_height = len(field) * tile_size[1]
+        screen_height = len(field) * tile_size[1] - 2 * tile_size[1] / 3
         self.__surface = pygame.display.set_mode((screen_width, screen_height))
         self.__surface.fill(config['color']['bg'])
         self.__dirty_rects = list()
