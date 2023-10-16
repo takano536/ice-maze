@@ -1,11 +1,12 @@
 import enum
 import pygame
+from pathlib import Path
 
 
 class Player(pygame.sprite.Sprite):
 
-    IMG_FILEPATH = 'visualizer/assets/player.png'
-    SPEED = 0.75
+    ASSETS_DIRPATH = str(Path(__file__).resolve().parents[1] / 'assets')
+    IMG_FILEPATH = str(Path(ASSETS_DIRPATH) / 'player.png')
 
     class Direction(enum.Enum):
         DOWN = 0
@@ -25,7 +26,7 @@ class Player(pygame.sprite.Sprite):
         self.__start_coord = list(coord)
         self.__curr_coord = list(coord)
         self.__next_coord = list(coord)
-        self.__speed = speed * self.SPEED
+        self.__speed = speed
         self.__direction = [0, 1]
         self.__is_moving = False
         self.__size = size
@@ -57,7 +58,7 @@ class Player(pygame.sprite.Sprite):
             self.__next_coord[0] += self.__direction[0]
             self.__next_coord[1] += self.__direction[1]
 
-    def update(self, surface: pygame.Surface, dirty_rects: list, background_img: pygame.Surface) -> None:
+    def update(self, surface: pygame.Surface, dirty_rects: list, delta_time: float, background_img: pygame.Surface) -> None:
         if not self.__is_moving:
             return
 
@@ -67,8 +68,8 @@ class Player(pygame.sprite.Sprite):
             dirty_rects.append(rect)
 
         # update player coord
-        self.__curr_coord[0] += self.__direction[0] * self.__speed
-        self.__curr_coord[1] += self.__direction[1] * self.__speed
+        self.__curr_coord[0] += self.__direction[0] * self.__speed * delta_time
+        self.__curr_coord[1] += self.__direction[1] * self.__speed * delta_time
         diff = [
             (self.__next_coord[0] - self.__curr_coord[0]) * self.__direction[0],
             (self.__next_coord[1] - self.__curr_coord[1]) * self.__direction[1]

@@ -2,24 +2,31 @@ import modules.player
 
 import pygame
 import random
+from pathlib import Path
 
 
 class Field:
 
-    ROCK_IMG_FILEPATH = 'visualizer/assets/rock.png'
-    STONE_IMG_FILEPATH = 'visualizer/assets/stone.png'
-    FLOOR_IMG_FILEPATH = 'visualizer/assets/ice-floor.png'
-    GOAL_IMG_FILEPATH = 'visualizer/assets/goal.png'
-    WALL_IMG_FILEPATH = 'visualizer/assets/wall-#.png'
+    ASSETS_DIRPATH = str(Path(__file__).resolve().parents[1] / 'assets')
+    ROCK_IMG_FILEPATH = str(Path(ASSETS_DIRPATH) / 'rock.png')
+    STONE_IMG_FILEPATH = str(Path(ASSETS_DIRPATH) / 'stone.png')
+    FLOOR_IMG_FILEPATH = str(Path(ASSETS_DIRPATH) / 'ice-floor.png')
+    GOAL_IMG_FILEPATH = str(Path(ASSETS_DIRPATH) / 'goal.png')
+    WALL_IMG_FILEPATH = str(Path(ASSETS_DIRPATH) / 'wall-#.png')
 
-    def __init__(self, field: list, colors: dict, tile_size: tuple, fps: int, surface: pygame.Surface) -> None:
+    def __init__(self, field: list, ans: list, ans_color: dict, font: str, font_size: int, tile_size: tuple, fps: int, surface: pygame.Surface) -> None:
         self.__field = field
         for i, s in enumerate(field):
             if 'S' in s:
                 self.__start_coord = (s.index('S'), i)
             if 'G' in s:
                 self.__goal_coord = (s.index('G'), i)
-        self.__colors = colors
+        self.__ans = ans
+        self.__ans_enabled = False
+        self.__should_write_answer = True
+        self.__font_color = ans_color
+        self.__font = pygame.font.SysFont(font, font_size, bold=True)
+        self.__tile_size = tile_size
         self.__floor_img = pygame.image.load(self.FLOOR_IMG_FILEPATH).convert()
         self.__stone_imgs = list()
         self.__goal_img = pygame.image.load(self.GOAL_IMG_FILEPATH).convert()
@@ -50,7 +57,7 @@ class Field:
         surface.blit(self.__wall_imgs[2], ((len(field[0]) - 1) * tile_size[1], 0))
         surface.blit(self.__wall_imgs[4], ((len(field[0]) - 1) * tile_size[1], (len(field) - 1) * tile_size[0]))
         surface.blit(self.__wall_imgs[6], (0, (len(field) - 1) * tile_size[0]))
-        
+
         for j, s in enumerate(field[0]):
             if j == 0 or j == len(field[0]) - 1:
                 continue
@@ -72,13 +79,30 @@ class Field:
             coord = (0, i * tile_size[0])
             surface.blit(self.__wall_imgs[7], coord)
 
-        default_speed = max(len(field[0]), len(field)) / fps
+        default_speed = max(tile_size) / 3
         self.__player = modules.player.Player(self.__start_coord, tile_size, default_speed, surface)
 
-    def update(self, surface: pygame.Surface, dirty_rects: list, key: int = None) -> None:
+    def update(self, surface: pygame.Surface, dirty_rects: list, delta_time: float, key: int = None) -> None:
+        if self.__ans_enabled:
+            self.__draw_ans(surface, dirty_rects)
         if key == pygame.K_r:
             self.__player.reset(surface, dirty_rects, self.__floor_img)
-        elif key is not None:
+        if key == pygame.K_SPACE:
+            self.__ans_enabled = True
+        if key is not None:
             self.__player.move(key, self.__field)
         else:
-            self.__player.update(surface, dirty_rects, self.__floor_img)
+            self.__player.update(surface, dirty_rects, delta_time, self.__floor_img)
+
+    def __draw_ans(self, surface: pygame.Surface, dirty_rects: list):
+        if not self.__should_write_answer:
+            return
+        for i, l in enumerate(self.__ans):
+            for j, num in enumerate(l):
+                if num == -1:
+                    continue
+                coord = ((j - 1) * self.__tile_size[1] + self.__tile_size[1] / 3, i * self.__tile_size[0] + self.__tile_size[0] / 3)
+                text = self.__font.render(str(num), True, self.__font_color)
+                surface.blit(text, coord)
+                dirty_rects.append(pygame.Rect(coord, self.__tile_size))
+        self.__should_write_answer = False
