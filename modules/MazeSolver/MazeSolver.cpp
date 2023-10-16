@@ -91,7 +91,7 @@ int MazeSolver::calcuate_rating() {
     for (const auto& s : map) {
         stone_cnt += std::count(s.begin(), s.end(), '#');
     }
-    rating -= stone_cnt * 40;
+    rating -= stone_cnt * 50;
 
     rating += procedure.size() * 100;
     rating += std::ceil(std::sqrt(state_cnt) * 100);
