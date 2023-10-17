@@ -36,12 +36,12 @@
 * `res/map.txt` - 出力されたパズルのサンプル
 * `res/answer.txt` - 出力されたパズルサンプルの答え
 * `modlues/` - パズルジェネレータプログラムで使用するソースコード
-* `nlohmann/json.hpp` - [nlohmann/json](https://github.com/nlohmann/json) からお借りしたJSONを扱うライブラリ
+* `nlohmann/json.hpp` - [nlohmann/json](https://github.com/nlohmann/json) からお借りした JSON ライブラリ
 * `config/params.json` - 氷のパズルジェネレータのパラメータ設定ファイル、以下は設定項目の説明
   * `batch_count` - 生成回数
   * `size` - パズルのサイズ
-  * `start` - スタート位置、`-1`でランダム化
-  * `goal` - ゴール位置、`-1`でランダム化
+  * `start` - スタート位置、`-1` でランダム化
+  * `goal` - ゴール位置、`-1` でランダム化
   * `output_dirpath` - 出力先のディレクトリの相対パス
   * `map_filename` - 出力するパズルのテキストファイル名
   * `answer_filename` - 出力するパズルの答えのテキストファイル名
@@ -55,7 +55,7 @@
   * `fps` - フレームレート
   * `font` - 答えの表示に使用する文字のフォント
   * `font_size` - 答えの表示に使用する文字の大きさ
-  * `speed_offset` - プレイヤーの移動速度の補正値、`1.0`でデフォルトの1.0倍
+  * `speed_offset` - プレイヤーの移動速度の補正値、`1.0` でデフォルトの1.0倍の速度
   * `map_filepath` - 出力されたパズルのテキストファイルパス
   * `answer_filepath` - 出力されたパズルの答えのテキストファイルパス
 
@@ -127,12 +127,11 @@ Python をインストールし、requirements.txt を使用してパッケー�
 * ゴールまでの最短移動回数が多い。
 * プレイヤーの止まる位置が多い。
 * 石の数が多すぎない。石が多いと一回の移動あたりの移動距離が短くなるため。
-* ゴールまでの最短移動回数が多いことが最重要事項。ゴールまでの最短移動回数が少ないと、たとえ他の2つの要素が達成されていたとしても、すぐにゴールに到達してしまい、他の要素が意味を成さない。
+* ゴールまでの最短移動回数が多いことが最重要事項。ゴールまでの最短移動回数が少ないと、たとえ他の2つの要素が達成されていたとしてもすぐにゴールに到達してしまい、他の要素が意味を成さない。
 
 最終的に、以下のレーティング算出方法を採用しました。
 
-* ゴールまでの最短移動回数 と √(プレイヤーの止まる位置の数)
-* 外壁以外の石 2 つ毎に -1 点のペナルティ
+$ゴールまでの最短移動回数+\sqrt{プレイヤーの止まる位置の数}-\dfrac{外壁以外の石の数}{2}$
 
 「プレイヤーの止まる位置の数」に平方根をとることで、「ゴールまでの最短移動回数」をより重視したレーティング算出を行うようになります。
 
@@ -147,6 +146,7 @@ Python をインストールし、requirements.txt を使用してパッケー�
 
 ## :scroll: クレジット
 
+* C++ 用 JSON ライブラリ - nlohmann - <https://github.com/nlohmann/json>
 * 岩や床、ゴールのはしごのタイルセット - KleinStudio - <https://www.deviantart.com/kleinstudio/art/Young-Boy-OW-BW-Style-335151519>
 * プレイヤーのスプライト - Piacarrot - <https://www.deviantart.com/piacarrot/art/Ice-Path-Tileset-392684771>
 * README.mdの装飾 - andreasbm - <https://github.com/andreasbm/readme>
