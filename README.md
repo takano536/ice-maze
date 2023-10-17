@@ -1,4 +1,4 @@
-<h1 align="center"> Ice Path Puzzle </h1>
+<h1 align="center">Ice Path Puzzle</h1>
 <p align="center">
   <img src="img/demo.jpg" alt="Visualizer" width="301px" height="260px">
 </p>
@@ -135,7 +135,9 @@ $ゴールまでの最短移動回数+\sqrt{プレイヤーの止まる位置の
 
 「プレイヤーの止まる位置の数」に平方根をとることで、「ゴールまでの最短移動回数」をより重視したレーティング算出を行うようになります。
 
-![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
+### Pygame を使ったスムーズなアニメーション
+
+Python はコンパイラ言語と比べて処理速度が遅いです。毎フレームでウインドウ全体を更新すると十分なフレームレートを維持することができません。プレイヤーの動いた範囲のみ更新することで、高いフレームレートを実現しています。
 
 ## :triangular_flag_on_post: 今後の展望
 
@@ -146,7 +148,7 @@ $ゴールまでの最短移動回数+\sqrt{プレイヤーの止まる位置の
 
 ## :scroll: クレジット
 
-* C++ 用 JSON ライブラリ - nlohmann - <https://github.com/nlohmann/json>
+* C++用 JSON ライブラリ - nlohmann - <https://github.com/nlohmann/json>
 * 岩や床、ゴールのはしごのタイルセット - KleinStudio - <https://www.deviantart.com/kleinstudio/art/Young-Boy-OW-BW-Style-335151519>
 * プレイヤーのスプライト - Piacarrot - <https://www.deviantart.com/piacarrot/art/Ice-Path-Tileset-392684771>
 * README.mdの装飾 - andreasbm - <https://github.com/andreasbm/readme>
