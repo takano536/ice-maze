@@ -6,7 +6,7 @@ from pathlib import Path
 class Player(pygame.sprite.Sprite):
 
     ASSETS_DIRPATH = str(Path(__file__).resolve().parents[1] / 'assets')
-    IMG_FILEPATH = str(Path(ASSETS_DIRPATH) / 'player.png')
+    IMG_FILEPATH = str(Path(ASSETS_DIRPATH) / 'young_boy_ow___bw_style_by_kleinstudio_d5jjgkf.png')
 
     class Direction(enum.Enum):
         DOWN = 0
@@ -21,18 +21,27 @@ class Player(pygame.sprite.Sprite):
         (1, 0): Direction.RIGHT
     }
 
-    def __init__(self, coord: tuple, size: tuple, speed: float, surface: pygame.Surface) -> None:
+    MOVING_ANIMATION_TIME = 150
+
+    def __init__(self, coord: tuple, tile_size: tuple, surface: pygame.Surface) -> None:
         super().__init__()
         self.__start_coord = list(coord)
         self.__curr_coord = list(coord)
         self.__next_coord = list(coord)
-        self.__speed = speed
+        self.__tile_size = tile_size
+        self.__speed = tile_size[0] * 0.25
         self.__direction = [0, 1]
         self.__is_moving = False
-        self.__size = size
-        self.__img = pygame.image.load(self.IMG_FILEPATH).convert()
-        self.__img.set_colorkey(self.__img.get_at((0, 0)))
-        surface.blit(self.__img, self.__draw_coord(), area=self.__draw_rect())
+        self.__size = [32, 64]
+
+        img = pygame.image.load(self.IMG_FILEPATH).convert()
+        img.set_colorkey(img.get_at((0, 0)))
+
+        self.__standing_imgs = [img.subsurface([16, i * 64, 32, 64]) for i in range(4)]
+        self.__moving_imgs = [img.subsurface([3 * 64 + 16, i * 64, 32, 64]) for i in range(4)]
+        self.__moving_img_timer = 0
+
+        surface.blit(self.__standing_imgs[self.Direction.DOWN.value], self.__get_draw_coord())
 
     def move(self, key: int, field: list) -> None:
         if self.__is_moving:
@@ -54,22 +63,21 @@ class Player(pygame.sprite.Sprite):
         if not self.__is_moving:
             return
 
+        self.__moving_img_timer = pygame.time.get_ticks()
+
         while field[self.__next_coord[1] + self.__direction[1]][self.__next_coord[0] + self.__direction[0]] not in ['#', 'G']:
             self.__next_coord[0] += self.__direction[0]
             self.__next_coord[1] += self.__direction[1]
 
-    def update(self, surface: pygame.Surface, dirty_rects: list, delta_time: float, background_img: pygame.Surface) -> None:
+    def update(self, surface: pygame.Surface, dirty_rects: list, delta_time: float) -> None:
         if not self.__is_moving:
             return
 
-        # draw background
-        for rect in self.__mask_rects():
-            surface.blit(background_img, rect)
-            dirty_rects.append(rect)
-
         # update player coord
-        self.__curr_coord[0] += self.__direction[0] * self.__speed * delta_time
-        self.__curr_coord[1] += self.__direction[1] * self.__speed * delta_time
+        moving_time = pygame.time.get_ticks() - self.__moving_img_timer
+        weight = min(moving_time, self.MOVING_ANIMATION_TIME) / self.MOVING_ANIMATION_TIME
+        self.__curr_coord[0] += self.__direction[0] * self.__speed * weight * delta_time
+        self.__curr_coord[1] += self.__direction[1] * self.__speed * weight * delta_time
         diff = [
             (self.__next_coord[0] - self.__curr_coord[0]) * self.__direction[0],
             (self.__next_coord[1] - self.__curr_coord[1]) * self.__direction[1]
@@ -79,35 +87,33 @@ class Player(pygame.sprite.Sprite):
             self.__is_moving = False
 
         # draw player
-        next_rect = pygame.Rect(self.__draw_coord(), self.__size)
-        surface.blit(self.__img, self.__draw_coord(), area=self.__draw_rect())
+        next_rect = pygame.Rect(self.__get_draw_coord(), self.__size)
+
+        should_use_standing_img = pygame.time.get_ticks() - self.__moving_img_timer > self.MOVING_ANIMATION_TIME
+        should_use_standing_img = should_use_standing_img or not self.__is_moving
+        using_imgs = self.__standing_imgs if should_use_standing_img else self.__moving_imgs
+        using_img = using_imgs[self.DIRECTION[tuple(self.__direction)].value]
+        surface.blit(using_img, self.__get_draw_coord())
+
         dirty_rects.append(next_rect)
 
-    def reset(self, surface: pygame.Surface, dirty_rects: list, background_img: tuple) -> None:
-        # draw background
-        for rect in self.__mask_rects():
-            surface.blit(background_img, rect)
-            dirty_rects.append(rect)
-
+    def reset(self, surface: pygame.Surface, dirty_rects: list) -> None:
         self.__curr_coord = self.__start_coord.copy()
         self.__next_coord = self.__start_coord.copy()
         self.__direction = [0, 1]
         self.__is_moving = False
 
         # draw player
-        next_rect = pygame.Rect(self.__draw_coord(), self.__size)
-        surface.blit(self.__img, self.__draw_coord(), area=self.__draw_rect())
+        next_rect = pygame.Rect(self.__get_draw_coord(), self.__size)
+        surface.blit(self.__standing_imgs[self.Direction.DOWN.value], self.__get_draw_coord())
         dirty_rects.append(next_rect)
 
-    def __draw_coord(self) -> tuple:
-        x = self.__curr_coord[0] * self.__size[0]
-        y = self.__curr_coord[1] * self.__size[1]
+    def __get_draw_coord(self) -> tuple:
+        x = self.__curr_coord[0] * self.__tile_size[0]
+        y = (self.__curr_coord[1] - 1) * self.__tile_size[1]
         return (x, y)
 
-    def __draw_rect(self):
-        return pygame.Rect(self.__is_moving * self.__size[0], self.DIRECTION[tuple(self.__direction)].value * self.__size[1], self.__size[0], self.__size[1])
-
-    def __mask_rects(self):
+    def get_mask_rects(self):
 
         def ceil(x, mod):
             return int(-(-x // mod) * mod)
@@ -115,8 +121,14 @@ class Player(pygame.sprite.Sprite):
         def floor(x, mod):
             return int(x // mod * mod)
 
-        draw_coord = self.__draw_coord()
-        top_left = (floor(draw_coord[0], self.__size[0]), floor(draw_coord[1], self.__size[1]))
-        bottom_right = (ceil(draw_coord[0] + self.__size[0], self.__size[0]), ceil(draw_coord[1] + self.__size[1], self.__size[1]))
-        rects = [pygame.Rect(x, y, self.__size[0], self.__size[1]) for x in range(top_left[0], bottom_right[0], self.__size[0]) for y in range(top_left[1], bottom_right[1], self.__size[1])]
+        rects = list()
+        topleft_draw_coord = self.__get_draw_coord()
+        bottomright_draw_coord = (topleft_draw_coord[0] + self.__size[0], topleft_draw_coord[1] + self.__size[1])
+        for i in range(floor(topleft_draw_coord[1], self.__tile_size[1]), ceil(bottomright_draw_coord[1], self.__tile_size[1]), self.__tile_size[1]):
+            for j in range(floor(topleft_draw_coord[0], self.__tile_size[0]), ceil(bottomright_draw_coord[0], self.__tile_size[0]), self.__tile_size[0]):
+                rects.append(pygame.Rect((j, i), self.__tile_size))
+
         return rects
+
+    def is_moving(self):
+        return self.__is_moving

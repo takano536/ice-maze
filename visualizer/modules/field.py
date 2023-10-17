@@ -1,18 +1,13 @@
 import modules.player
 
 import pygame
-import random
 from pathlib import Path
 
 
 class Field:
 
     ASSETS_DIRPATH = str(Path(__file__).resolve().parents[1] / 'assets')
-    ROCK_IMG_FILEPATH = str(Path(ASSETS_DIRPATH) / 'rock.png')
-    STONE_IMG_FILEPATH = str(Path(ASSETS_DIRPATH) / 'stone.png')
-    FLOOR_IMG_FILEPATH = str(Path(ASSETS_DIRPATH) / 'ice-floor.png')
-    GOAL_IMG_FILEPATH = str(Path(ASSETS_DIRPATH) / 'goal.png')
-    WALL_IMG_FILEPATH = str(Path(ASSETS_DIRPATH) / 'wall-#.png')
+    IMG_FILEPATH = str(Path(ASSETS_DIRPATH) / 'ice_path_tileset_by_piacarrot_d6hslib.png')
 
     def __init__(self, field: list, ans: list, ans_color: dict, font: str, font_size: int, tile_size: tuple, fps: int, surface: pygame.Surface) -> None:
         self.__field = field
@@ -27,72 +22,38 @@ class Field:
         self.__font_color = ans_color
         self.__font = pygame.font.SysFont(font, font_size, bold=True)
         self.__tile_size = tile_size
-        self.__floor_img = pygame.image.load(self.FLOOR_IMG_FILEPATH).convert()
-        self.__stone_imgs = list()
-        self.__goal_img = pygame.image.load(self.GOAL_IMG_FILEPATH).convert()
-        self.__goal_img.set_colorkey(self.__goal_img.get_at((0, 0)))
-        stone_img = pygame.image.load(self.STONE_IMG_FILEPATH).convert()
-        rock_img = pygame.image.load(self.ROCK_IMG_FILEPATH).convert()
-        stone_img.set_colorkey(stone_img.get_at((0, 0)))
-        rock_img.set_colorkey(rock_img.get_at((0, 0)))
-        self.__stone_imgs.append(stone_img)
-        self.__stone_imgs.append(rock_img)
-        self.__wall_imgs = list()
-        for i in range(8):
-            img = pygame.image.load(self.WALL_IMG_FILEPATH.replace('#', str(i)))
-            self.__wall_imgs.append(img)
+
+        tileset = pygame.image.load(self.IMG_FILEPATH).convert()
+        self.__floor_img = tileset.subsurface([0, 0, 32, 32])
+        self.__goal_img = tileset.subsurface([64, 0, 32, 32])
+        self.__stone_img = tileset.subsurface([64, 64, 32, 32])
 
         for i, s in enumerate(field):
             for j, c in enumerate(s):
-                if i == 0 or i == len(field) - 1 or j == 0 or j == len(field[0]) - 1:
-                    continue
                 coord = (j * tile_size[1], i * tile_size[0])
                 surface.blit(self.__floor_img, coord)
                 if c == '#':
-                    surface.blit(random.choice(self.__stone_imgs), coord)
+                    surface.blit(self.__stone_img, coord)
                 if c == 'G':
                     surface.blit(self.__goal_img, coord)
 
-        surface.blit(self.__wall_imgs[0], (0, 0))
-        surface.blit(self.__wall_imgs[2], ((len(field[0]) - 1) * tile_size[1], 0))
-        surface.blit(self.__wall_imgs[4], ((len(field[0]) - 1) * tile_size[1], (len(field) - 1) * tile_size[0]))
-        surface.blit(self.__wall_imgs[6], (0, (len(field) - 1) * tile_size[0]))
-
-        for j, s in enumerate(field[0]):
-            if j == 0 or j == len(field[0]) - 1:
-                continue
-            coord = (j * tile_size[1], 0)
-            surface.blit(self.__wall_imgs[1], coord)
-        for i, s in enumerate(field[0]):
-            if i == 0 or i == len(field) - 1:
-                continue
-            coord = ((len(field[0]) - 1) * tile_size[1], i * tile_size[0])
-            surface.blit(self.__wall_imgs[3], coord)
-        for j, s in enumerate(field[0]):
-            if j == 0 or j == len(field[0]) - 1:
-                continue
-            coord = (j * tile_size[1], (len(field) - 1) * tile_size[0])
-            surface.blit(self.__wall_imgs[5], coord)
-        for i, s in enumerate(field[0]):
-            if i == 0 or i == len(field) - 1:
-                continue
-            coord = (0, i * tile_size[0])
-            surface.blit(self.__wall_imgs[7], coord)
-
-        default_speed = max(tile_size) / 3
-        self.__player = modules.player.Player(self.__start_coord, tile_size, default_speed, surface)
+        self.__player = modules.player.Player(self.__start_coord, tile_size, surface)
 
     def update(self, surface: pygame.Surface, dirty_rects: list, delta_time: float, key: int = None) -> None:
         if self.__ans_enabled:
             self.__draw_ans(surface, dirty_rects)
-        if key == pygame.K_r:
-            self.__player.reset(surface, dirty_rects, self.__floor_img)
         if key == pygame.K_SPACE:
             self.__ans_enabled = True
+        if key == pygame.K_r:
+            self.__draw_mask(surface, dirty_rects)
+            self.__player.reset(surface, dirty_rects)
+            
         if key is not None:
             self.__player.move(key, self.__field)
-        else:
-            self.__player.update(surface, dirty_rects, delta_time, self.__floor_img)
+            
+        if self.__player.is_moving():
+            self.__draw_mask(surface, dirty_rects)
+        self.__player.update(surface, dirty_rects, delta_time)
 
     def __draw_ans(self, surface: pygame.Surface, dirty_rects: list):
         if not self.__should_write_answer:
@@ -106,3 +67,14 @@ class Field:
                 surface.blit(text, coord)
                 dirty_rects.append(pygame.Rect(coord, self.__tile_size))
         self.__should_write_answer = False
+
+    def __draw_mask(self, surface: pygame.Surface, dirty_rects: list):
+        def coord2idx(coord: tuple) -> tuple:
+            return (coord[1] // self.__tile_size[1], coord[0] // self.__tile_size[0])
+
+        mask_rects = self.__player.get_mask_rects()
+        for rect in mask_rects:
+            i, j = coord2idx(pygame.Rect(rect).topleft)
+            mask_img = self.__stone_img if self.__field[i][j] == '#' else self.__goal_img if self.__field[i][j] == 'G' else self.__floor_img
+            surface.blit(mask_img, rect)
+            dirty_rects.append(rect)
