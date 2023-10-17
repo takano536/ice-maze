@@ -8,6 +8,7 @@
 #include <fstream>
 #include <iostream>
 #include <random>
+#include <ranges>
 #include <string>
 
 const std::string CONFIG_FILEPATH = "config/params.json";
@@ -43,7 +44,7 @@ int main() {
         std::uint32_t stone_pop_count = rand(BIT_LENGTH);
         std::string bit_string;
         bit_string = std::string(stone_pop_count, '1') + std::string(BIT_LENGTH - stone_pop_count, '0');
-        std::shuffle(bit_string.begin(), bit_string.end(), rand_engine);
+        std::ranges::shuffle(bit_string, rand_engine);
 
         // 迷路を作る
         Vec2 start = START;

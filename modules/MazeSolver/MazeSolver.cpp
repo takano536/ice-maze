@@ -7,6 +7,7 @@
 #include <iostream>
 #include <numeric>
 #include <queue>
+#include <ranges>
 
 void MazeSolver::initialize(const std::vector<std::string>& map, Vec2 size, Vec2 start, Vec2 goal) {
     this->map = map;
@@ -89,7 +90,7 @@ int MazeSolver::calcuate_rating() {
 
     int stone_cnt = -(size.first * 2 + size.second * 2 - 4);
     for (const auto& s : map) {
-        stone_cnt += std::count(s.begin(), s.end(), '#');
+        stone_cnt += std::ranges::count(s, '#');
     }
     rating -= stone_cnt * 50;
 
@@ -135,8 +136,8 @@ void MazeSolver::restore_procedure() {
             break;
         }
     }
-    std::reverse(procedure.begin(), procedure.end());
-    std::reverse(dists_to_goal.begin(), dists_to_goal.end());
+    std::ranges::reverse(procedure);
+    std::ranges::reverse(dists_to_goal);
 }
 
 void MazeSolver::print() {

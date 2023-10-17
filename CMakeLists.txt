@@ -1,3 +1,10 @@
 cmake_minimum_required(VERSION 3.1...3.5)
 project(ice-puzzle CXX)
-add_executable(main main.cpp ./modules/MazeGenerator/MazeGenerator.cpp ./modules/MazeSolver/MazeSolver.cpp ./modules/Vec2/Vec2.cpp)
+set(CMAKE_CXX_STANDARD 20)
+add_executable(
+    main 
+    ./main.cpp 
+    ./modules/MazeGenerator/MazeGenerator.cpp 
+    ./modules/MazeSolver/MazeSolver.cpp 
+    ./modules/Vec2/Vec2.cpp
+)

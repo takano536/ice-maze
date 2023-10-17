@@ -1,10 +1,12 @@
 #include "MazeGenerator.hpp"
 
+#include <algorithm>
 #include <array>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <random>
+#include <ranges>
 #include <regex>
 
 void MazeGenerator::initialize(const std::string& bit_string, Vec2 size, Vec2 start, Vec2 goal) {
@@ -36,7 +38,7 @@ void MazeGenerator::initialize(const std::string& bit_string, Vec2 size, Vec2 st
             in_directions.push_back(dir);
         }
     }
-    std::shuffle(in_directions.begin(), in_directions.end(), rand_engine);
+    std::ranges::shuffle(in_directions, rand_engine);
     for (std::size_t i = 1; i < in_directions.size(); i++) {
         map[goal.first + in_directions[i].first][goal.second + in_directions[i].second] = '#';
     }
