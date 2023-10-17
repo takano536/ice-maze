@@ -6,5 +6,3 @@
 build/
 .ice-puzzle-venv/
 .vscode/
-
-res/

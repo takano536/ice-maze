@@ -23,13 +23,13 @@ class Player(pygame.sprite.Sprite):
 
     MOVING_ANIMATION_TIME = 150
 
-    def __init__(self, coord: tuple, tile_size: tuple, surface: pygame.Surface) -> None:
+    def __init__(self, coord: tuple, tile_size: tuple, speed_offset: float, surface: pygame.Surface) -> None:
         super().__init__()
         self.__start_coord = list(coord)
         self.__curr_coord = list(coord)
         self.__next_coord = list(coord)
         self.__tile_size = tile_size
-        self.__speed = tile_size[0] * 0.25
+        self.__speed = tile_size[0] * 0.25 * speed_offset
         self.__direction = [0, 1]
         self.__is_moving = False
         self.__size = [32, 64]
@@ -114,7 +114,6 @@ class Player(pygame.sprite.Sprite):
         return (x, y)
 
     def get_mask_rects(self):
-
         def ceil(x, mod):
             return int(-(-x // mod) * mod)
 

@@ -9,6 +9,8 @@ import sys
 class App:
 
     CONFIG_FILEPATH = str(Path(__file__).resolve().parents[1] / 'config' / 'config.json')
+    
+    TILE_SIZE = (32, 32)
 
     def __init__(self) -> None:
 
@@ -20,7 +22,6 @@ class App:
         with open(self.CONFIG_FILEPATH, 'r') as f:
             config = json.load(f)
         self.__fps = config['fps']
-        self.__tile_size = tuple(config['tile_size'].values())
 
         # load field
         map_filepath = str(Path(config['map_filepath']).resolve())
@@ -47,14 +48,22 @@ class App:
             ans.append(nums)
 
         # init surface & dirty rects
-        screen_width = len(field[0]) * self.__tile_size[0]
-        screen_height = len(field) * self.__tile_size[1]
+        screen_width = len(field[0]) * self.TILE_SIZE[0]
+        screen_height = len(field) * self.TILE_SIZE[1]
         self.__surface = pygame.display.set_mode((screen_width, screen_height))
-        self.__surface.fill(config['color']['bg'])
         self.__dirty_rects = list()
 
         # init field
-        self.__field = modules.field.Field(field, ans, config['color']['text'], config['font'], config['font_size'], self.__tile_size, config['fps'], self.__surface)
+        self.__field = modules.field.Field(
+            field,
+            ans,
+            config['font_color'],
+            config['font'],
+            config['font_size'],
+            self.TILE_SIZE,
+            config['speed_offset'],
+            self.__surface
+        )
 
         self.__clock = pygame.time.Clock()
         self.__delta_time = self.__clock.get_time()
