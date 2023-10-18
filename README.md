@@ -149,6 +149,6 @@ Python はコンパイラ言語と比べて処理速度が遅いです。毎フ�
 ## :scroll: クレジット
 
 * C++用 JSON ライブラリ - nlohmann - <https://github.com/nlohmann/json>
-* 岩や床、ゴールのはしごのタイルセット - KleinStudio - <https://www.deviantart.com/kleinstudio/art/Young-Boy-OW-BW-Style-335151519>
-* プレイヤーのスプライト - Piacarrot - <https://www.deviantart.com/piacarrot/art/Ice-Path-Tileset-392684771>
+* 岩や床、ゴールのはしごのタイルセット - Piacarrot - <https://www.deviantart.com/piacarrot/art/Ice-Path-Tileset-392684771>
+* プレイヤーのスプライト - KleinStudio - <https://www.deviantart.com/kleinstudio/art/Young-Boy-OW-BW-Style-335151519>
 * README.mdの装飾 - andreasbm - <https://github.com/andreasbm/readme>
