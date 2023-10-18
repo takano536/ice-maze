@@ -88,7 +88,7 @@ CMake suite maintained and supported by Kitware (kitware.com/cmake).
 > cmake --build "${PROJECT_HOME}/build" --target all -j 10 --
 ```
 
-ビルドにより生成された実行ファイルを実行すると、`config/params.json`で設定したディレクトリに、パズルとその答えが書かれたテキストファイルが生成されます。
+ビルドにより生成された実行ファイルを実行すると、`config/params.json`で設定したディレクトリにパズルとその答えが書かれたテキストファイルが生成されます。
 
 ### ビジュアライザ
 
@@ -127,7 +127,7 @@ Python をインストールし、requirements.txt を使用してパッケー�
 * ゴールまでの最短移動回数が多い。
 * プレイヤーの止まる位置が多い。
 * 石の数が多すぎない。石が多いと一回の移動あたりの移動距離が短くなるため。
-* ゴールまでの最短移動回数が多いことが最重要事項。ゴールまでの最短移動回数が少ないと、たとえ他の2つの要素が達成されていたとしてもすぐにゴールに到達してしまい、他の要素が意味を成さない。
+* ゴールまでの最短移動回数が多いことが最重要事項。ゴールまでの最短移動回数が少ないと、たとえ他の2つの要素が達成されていたとしてもすぐにゴールに到達してしまい他の要素が意味を成さない。
 
 最終的に、以下のレーティング算出方法を採用しました。
 
@@ -151,4 +151,4 @@ Python はコンパイラ言語と比べて処理速度が遅いです。毎フ�
 * C++用 JSON ライブラリ - nlohmann - <https://github.com/nlohmann/json>
 * 岩や床、ゴールのはしごのタイルセット - Piacarrot - <https://www.deviantart.com/piacarrot/art/Ice-Path-Tileset-392684771>
 * プレイヤーのスプライト - KleinStudio - <https://www.deviantart.com/kleinstudio/art/Young-Boy-OW-BW-Style-335151519>
-* README.mdの装飾 - andreasbm - <https://github.com/andreasbm/readme>
+* README.md の装飾 - andreasbm - <https://github.com/andreasbm/readme>
