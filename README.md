@@ -63,7 +63,7 @@
 
 ## :computer: 使い方
 
-以下のURLから遊ぶこともできます。<https://replit.com/@takano536/ice-maze>
+以下のURLから遊ぶこともできます。<https://replit.com/@takano536/ice-maze?v=1>
 
 ### パズルジェネレータ
 
