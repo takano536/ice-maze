@@ -63,9 +63,11 @@
 
 ## :computer: 使い方
 
+以下のURLから遊ぶこともできます。<https://replit.com/@takano536/ice-maze>
+
 ### パズルジェネレータ
 
-C言語コンパイラと CMake をインストールし、ビルドを行ってください。Windows 環境で以下のコンパイラと CMake による動作を確認しています。
+C++コンパイラと CMake をインストールし、ビルドを行ってください。Windows 環境で以下のコンパイラと CMake による動作を確認しています。
 
 ```[powershell]
 > g++ --version                                                                                                                                    
