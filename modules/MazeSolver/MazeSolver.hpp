@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../CoordCompressor/CoordCompressor.hpp"
+#include "../Vec2/Vec2.hpp"
 
 #include <algorithm>
 #include <array>
